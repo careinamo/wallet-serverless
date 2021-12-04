@@ -10,12 +10,24 @@ const closeOrder = async (event) => {
     if (event.body != null) {
         body = JSON.parse(event.body);
     }
-    let insert;
+    let order;
     try {
-        insert = await prisma.order.create({
+        order = await prisma.order.create({
             data: {
-                userId: 1,
-                total: body.total
+                userId: body.user_id,
+                total: body.total,
+            },
+        });
+        const user = await prisma.user.findFirst({
+            where: { id: body.user_id },
+        });
+        let balanceUpdated = Number(user === null || user === void 0 ? void 0 : user.balance) - body.total;
+        await prisma.user.update({
+            where: {
+                id: body.user_id,
+            },
+            data: {
+                balance: balanceUpdated
             }
         });
     }
@@ -28,8 +40,8 @@ const closeOrder = async (event) => {
     // successResponse handles wrapping the response in an API Gateway friendly
     // format (see other responses, including CORS, in `./utils/lambda-response.ts)
     const response = (0, utils_1.successResponse)({
-        message: 'Go Serverless! Your function executed successfully!',
-        insert,
+        message: 'Order created successfully!',
+        order,
     });
     return response;
 };

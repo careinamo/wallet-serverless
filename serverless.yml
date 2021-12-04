@@ -11,18 +11,25 @@ provider:
 
 functions:
   storeUser:
-    handler: dist/User.default
+    handler: dist/addUser.default
     events:
       - http:
-          path: users
+          path: addUser
           method: post
 
-  storeUser:
-    handler: dist/User.default
+  closeOrder:
+    handler: dist/closeOrder.default
     events:
       - http:
-          path: orders
+          path: orders/closeOrder
           method: post
+
+  addCredits:
+    handler: dist/addCredits.default
+    events:
+      - http:
+          path: credits/addCredits
+          method: post          
 
 plugins:
   - serverless-offline

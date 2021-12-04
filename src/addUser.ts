@@ -1,4 +1,3 @@
-import { APIGatewayEvent, Context } from "aws-lambda";
 import { successResponse, errorResponse, runWarm } from './utils';
 import { Response } from './utils/lambda-response';
 import { PrismaClient } from '@prisma/client';
@@ -37,7 +36,7 @@ const storeUser = async (event: AWSLambda.APIGatewayEvent): Promise<Response> =>
   // successResponse handles wrapping the response in an API Gateway friendly
   // format (see other responses, including CORS, in `./utils/lambda-response.ts)
   const response = successResponse({
-    message: 'Go Serverless! Your function executed successfully!',
+    message: 'User Created!',
     insert,
   });
 

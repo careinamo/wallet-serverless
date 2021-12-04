@@ -10,22 +10,40 @@ const prisma = new PrismaClient({
 })
 
 
-const closeOrder = async (event: AWSLambda.APIGatewayEvent): Promise<Response> => {
+const addCredits = async (event: AWSLambda.APIGatewayEvent): Promise<Response> => {
 
   let body = null;
 
   if (event.body != null){
     body = JSON.parse(event.body);
   }
-  let insert;
+
+  let credits;
 
   try {
-    insert = await prisma.order.create({
+
+    credits = await prisma.credit.create({
       data: {
-        userId: 1,
-        total: body.total
+        userId: body.user_id,
+        total: body.total,
+      },
+    })
+
+
+    const user = await prisma.user.findFirst({
+      where: { id : body.user_id },
+    })
+
+    let balanceUpdated = Number(user?.balance) + body.total
+
+    await prisma.user.update({
+      where: {
+        id: body.user_id,
+      },
+      data: {
+        balance: balanceUpdated
       }
-    })  
+    })
   } catch (e) {
       console.error(`Cannot create user information. Cause: ${e.message}`);
       return errorResponse({
@@ -33,16 +51,12 @@ const closeOrder = async (event: AWSLambda.APIGatewayEvent): Promise<Response> =
       });
   }
 
-  // successResponse handles wrapping the response in an API Gateway friendly
-  // format (see other responses, including CORS, in `./utils/lambda-response.ts)
   const response = successResponse({
-    message: 'Go Serverless! Your function executed successfully!',
-    insert,
+    message: 'Add credits successfully!',
+    credits,
   });
 
   return response;
 };
 
-// runWarm function handles pings from the scheduler so you don't
-// have to put that boilerplate in your function.
-export default runWarm(closeOrder);
+export default runWarm(addCredits);
