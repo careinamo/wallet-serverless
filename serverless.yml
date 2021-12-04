@@ -1,0 +1,41 @@
+service: muncher
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-2'}
+  profile: ${opt:profile, 'prisma_demo'}
+  apiGateway:
+    shouldStartNameWithService: true
+
+functions:
+  storeUser:
+    handler: dist/User.default
+    events:
+      - http:
+          path: users
+          method: post
+
+  storeUser:
+    handler: dist/User.default
+    events:
+      - http:
+          path: orders
+          method: post
+
+plugins:
+  - serverless-offline
+
+# this exclude is specific to your system if your not on the same environment as Lambda
+# this is added to decrease the output size to prevent size related issues
+package:
+  exclude:
+    - '!node_modules/.prisma/client/libquery_engine-*'
+    - 'node_modules/.prisma/client/libquery_engine-rhel-*'
+    - 'src/**/*'
+    - '*.eslint'
+
+custom:
+  serverless-offline:
+    useChildProcesses: true
